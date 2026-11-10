@@ -1,0 +1,24 @@
+# Whitelist model: ignore everything, then opt paths in explicitly.
+# This is deliberate. This directory holds credentials, licensed vendor data,
+# a positions database and personal notes, none of which may be published, and
+# a blacklist would eventually miss one.
+/*
+
+# --- published ---
+!.gitignore
+!.env.example
+!LICENSE
+!README.md
+!pyproject.toml
+!product/
+!tests/
+!.github/
+
+# --- never published, even inside whitelisted directories ---
+**/__pycache__/
+**/*.py[cod]
+**/.DS_Store
+**/.env
+**/*.sqlite
+**/*.csv
+**/*.parquet

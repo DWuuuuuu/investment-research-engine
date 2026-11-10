@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Forecast Radar</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Investment Research Engine</p>
+        <h1>Signal vs. Noise</h1>
+      </div>
+      <div class="header-actions">
+        <button id="reloadBtn" class="secondary-btn" type="button">Reload</button>
+        <button id="refreshBtn" class="primary-btn refresh-btn" type="button" aria-live="polite">
+          <span class="btn-icon" aria-hidden="true">↻</span>
+          <span id="refreshBtnText">Refresh live data</span>
+        </button>
+      </div>
+    </header>
+
+    <nav class="market-nav" aria-label="Market selection">
+      <button class="market-nav-btn active" data-market="us" type="button">🇺🇸 US</button>
+      <button class="market-nav-btn"        data-market="cn" type="button">🇨🇳 China (A-Share)</button>
+    </nav>
+
+    <nav class="page-nav" aria-label="Page navigation">
+      <span class="page-nav-label" data-market="us">Context</span>
+      <button class="page-nav-btn active" data-page="macro"   data-market="us" type="button">Macro</button>
+      <button class="page-nav-btn"        data-page="markets" data-market="us" type="button">Prediction Mkts</button>
+      <span class="page-nav-label" data-market="us">Pick</span>
+      <span class="page-nav-sublabel" data-market="us">Stock</span>
+      <button class="page-nav-btn"        data-page="filter"  data-market="us" type="button">Filter</button>
+      <button class="page-nav-btn"        data-page="quant"   data-market="us" type="button">Rank</button>
+      <button class="page-nav-btn"        data-page="stocks"  data-market="us" type="button">Stocks</button>
+      <span class="page-nav-sublabel" data-market="us">ETF</span>
+      <button class="page-nav-btn"        data-page="etfs"    data-market="us" type="button">ETFs</button>
+      <span class="page-nav-label" data-market="us">Test</span>
+      <button class="page-nav-btn"        data-page="siglab"  data-market="us" type="button">Validate</button>
+      <span class="page-nav-label" data-market="us">Track</span>
+      <button class="page-nav-btn"        data-page="pipeline" data-market="us" type="button">Pipeline</button>
+      <button class="page-nav-btn"        data-page="portfolio" data-market="us" type="button">Portfolio</button>
+      <span class="page-nav-label" data-market="cn">Context</span>
+      <button class="page-nav-btn"        data-page="cn_macro" data-market="cn" type="button">Macro</button>
+      <span class="page-nav-label" data-market="cn">Pick</span>
+      <button class="page-nav-btn"        data-page="filter"  data-market="cn" type="button">Filter</button>
+      <button class="page-nav-btn"        data-page="quant"   data-market="cn" type="button">Rank</button>
+      <button class="page-nav-btn"        data-page="ashare"  data-market="cn" type="button">Stocks</button>
+      <button class="page-nav-btn"        data-page="research" data-market="cn" type="button">Sell-Side Research</button>
+      <span class="page-nav-label" data-market="cn">Test</span>
+      <button class="page-nav-btn"        data-page="siglab"  data-market="cn" type="button">Validate</button>
+      <span class="page-nav-label" data-market="cn">Track</span>
+      <button class="page-nav-btn"        data-page="pipeline" data-market="cn" type="button">Pipeline</button>
+      <button class="page-nav-btn"        data-page="portfolio" data-market="cn" type="button">Portfolio</button>
+    </nav>
+
+    <main>
+      <section class="stats-grid" aria-label="Data summary">
+        <article class="stat">
+          <span class="stat-label">Markets tracked</span>
+          <strong id="marketCount">—</strong>
+        </article>
+        <article class="stat">
+          <span class="stat-label">Snapshots</span>
+          <strong id="snapshotCount">—</strong>
+        </article>
+        <article class="stat">
+          <span class="stat-label">Last update</span>
+          <strong id="lastUpdate">—</strong>
+        </article>
+        <article class="stat">
+          <span class="stat-label">Sources</span>
+          <strong id="sourceCount">—</strong>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <aside class="controls" aria-label="Dashboard controls">
+          <div class="control-group">
+            <label for="viewSelect">View</label>
+            <select id="viewSelect">
+              <option value="radar">Radar</option>
+              <option value="divergence">Divergence</option>
+              <option value="fedwatch">FOMC Path</option>
+              <option value="earnings">Earnings</option>
+              <option value="orderflow">Order Flow</option>
+              <option value="quality">Signal Quality</option>
+              <option value="markets">Markets</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="categorySelect">Category</label>
+            <select id="categorySelect">
+              <option value="">All investment categories</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="sourceSelect">Source</label>
+            <select id="sourceSelect">
+              <option value="">All sources</option>
+              <option value="polymarket">Polymarket</option>
+              <option value="kalshi">Kalshi</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="searchInput">Search</label>
+            <input id="searchInput" type="search" placeholder="Fed, Bitcoin, Iran…">
+          </div>
+
+          <div class="control-row">
+            <label for="lookbackInput">Lookback hours</label>
+            <input id="lookbackInput" type="number" min="1" max="720" value="24">
+          </div>
+
+          <div class="control-row">
+            <label for="probInput">Min probability</label>
+            <input id="probInput" type="number" min="0" max="1" step="0.01" value="0.02">
+          </div>
+
+          <div class="control-row" id="minDeltaRow">
+            <label for="minDeltaInput">Min divergence</label>
+            <input id="minDeltaInput" type="number" min="0.01" max="0.5" step="0.01" value="0.05">
+          </div>
+
+          <div class="control-row">
+            <label for="limitInput">Limit</label>
+            <input id="limitInput" type="number" min="5" max="200" value="30">
+          </div>
+
+          <div class="control-row">
+            <label for="maxPerEventInput">Max per event</label>
+            <input id="maxPerEventInput" type="number" min="1" max="20" value="5">
+          </div>
+
+          <label class="checkbox-row">
+            <input id="allCategoriesInput" type="checkbox">
+            <span>Include all categories</span>
+          </label>
+
+          <div class="status" id="statusText">Ready</div>
+        </aside>
+
+        <section class="content-shell" aria-live="polite">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow" id="tableEyebrow">Probability moves</p>
+              <h2 id="tableTitle">Radar</h2>
+            </div>
+            <nav id="macroSubNav" class="view-tabs" hidden aria-label="Macro views">
+              <button class="view-tab active" data-view="cycle"     type="button">Cycle Diagnosis</button>
+              <button class="view-tab"        data-view="valuation" type="button">Market Valuation</button>
+              <button class="view-tab"        data-view="sentiment" type="button">Market Sentiment</button>
+              <button class="view-tab"        data-view="index"     type="button">Market Index</button>
+              <button class="view-tab"        data-view="cp3"       type="button">Distribution Days</button>
+              <button class="view-tab"        data-view="fomc"      type="button">FOMC Rate Path</button>
+            </nav>
+            <p id="tableMeta">—</p>
+          </div>
+          <div id="content" class="content-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <div id="detailPanel" class="detail-panel" hidden>
+      <div class="detail-header">
+        <div>
+          <p class="eyebrow" id="detailSource">Market</p>
+          <h2 id="detailTitle">—</h2>
+        </div>
+        <button id="closeDetailBtn" class="icon-btn" type="button" aria-label="Close detail">✕</button>
+      </div>
+      <div id="detailBody"></div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
